@@ -6,6 +6,7 @@
              xmlns:common="using:MyerSplash.Common"
              xmlns:control="using:MyerSplashCustomControl"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:higan="using:Marduk.Controls"
              xmlns:local="using:MyerSplash.UC"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:model="using:MyerSplash.Model"
@@ -14,7 +15,7 @@
              d:DesignWidth="400"
              mc:Ignorable="d">
 
-    <control:AdaptiveGridView x:Name="ImageGridView"
+    <!--<control:AdaptiveGridView x:Name="ImageGridView"
                               Margin="0"
                               attach:ScrollViewerStyleChanger.Style="{StaticResource ScrollViewerCommonStyle}"
                               ContainerContentChanging="AdaptiveGridView_ContainerContentChanging"
@@ -87,5 +88,76 @@
                 </Grid>
             </Grid>
         </control:AdaptiveGridView.Footer>
-    </control:AdaptiveGridView>
+    </control:AdaptiveGridView>-->
+    <Grid Background="#FF2B2B2B">
+        <ScrollViewer x:Name="MainSV"
+                  Background="{x:Null}"
+                  Loaded="ImageGridView_Loaded"
+                  Margin="12,0"
+                  Style="{StaticResource ScrollViewerCommonStyle}">
+            <higan:WaterfallFlowView 
+                                 AdaptiveMode="MinBased"
+                                 ItemSource="{x:Bind MainVM.MainList, Mode=OneWay}"
+                                 MinItemWidth="300"
+                                 ItemTapped="WaterfallFlowView_ItemTapped"
+                                 Spacing="12" >
+                <higan:WaterfallFlowView.ItemTemplate>
+                    <DataTemplate x:DataType="model:UnsplashImage">
+                        <Grid>
+                            <Border Background="{x:Bind BackColor, Mode=OneWay}" />
+                            <Image Source="{x:Bind ListImageBitmap, Mode=OneWay}" Stretch="UniformToFill" />
+                        </Grid>
+                    </DataTemplate>
+                </higan:WaterfallFlowView.ItemTemplate>
+                <higan:WaterfallFlowView.Header>
+                    <Grid Height="85" />
+                </higan:WaterfallFlowView.Header>
+                <higan:WaterfallFlowView.ItemContainerStyle>
+                    <Style TargetType="higan:VirtualizingViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </higan:WaterfallFlowView.ItemContainerStyle>
+                <higan:WaterfallFlowView.Footer>
+                    <Grid Height="100">
+                        <Grid Height="50" Visibility="{x:Bind MainVM.ShowFooterLoading, Mode=OneWay}">
+                            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                <ProgressRing Foreground="{StaticResource MyerSplashThemeDarkColor}" IsActive="True" />
+                                <TextBlock Margin="10,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontWeight="Bold"
+                                       Foreground="White"
+                                       Text="LOADING..." />
+                            </StackPanel>
+                        </Grid>
+                        <Grid HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          Background="{StaticResource MyerSplashDarkColor}"
+                          Visibility="{x:Bind MainVM.ShowFooterReloadGrid, Mode=OneWay}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="10"
+                                       VerticalAlignment="Center"
+                                       Foreground="White"
+                                       Text="Oops,try to retry." />
+                                <Button Width="100"
+                                    Margin="5"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    Command="{x:Bind MainVM.RetryCommand, Mode=OneWay}"
+                                    Style="{StaticResource ButtonCommonStyle}">
+                                    <Border Background="{StaticResource MyerSplashThemeColor}">
+                                        <TextBlock Margin="5"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Foreground="White"
+                                               Text="RETRY" />
+                                    </Border>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </higan:WaterfallFlowView.Footer>
+            </higan:WaterfallFlowView>
+        </ScrollViewer>
+
+    </Grid>
 </UserControl>

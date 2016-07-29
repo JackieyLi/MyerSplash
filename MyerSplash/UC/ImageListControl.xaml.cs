@@ -39,14 +39,14 @@ namespace MyerSplash.UC
 
         private void ImageGridView_ItemClick(object sender, ItemClickEventArgs e)
         {
-            var item = e.ClickedItem;
-            var container = ImageGridView.ContainerFromItem(item) as FrameworkElement;
-            Canvas.SetZIndex(container, ++_zindex);
+            //var item = e.ClickedItem;
+            //var container = MainSV.ContainerFromItem(item) as FrameworkElement;
+            //Canvas.SetZIndex(container, ++_zindex);
 
-            _containerVisual = ElementCompositionPreview.GetElementVisual(container);
+            //_containerVisual = ElementCompositionPreview.GetElementVisual(container);
 
-            var img = item as UnsplashImage;
-            OnClickItemStarted?.Invoke(img, container);
+            //var img = item as UnsplashImage;
+            //OnClickItemStarted?.Invoke(img, container);
         }
 
         public void MoveItemAnimation(Vector3 targetOffset, float widthRatio)
@@ -85,7 +85,7 @@ namespace MyerSplash.UC
 
         public void ScrollToTop()
         {
-            ImageGridView.GetScrollViewer().ChangeView(null, 0, null);
+            MainSV.ChangeView(null, 0, null);
         }
 
         #region List Animation
@@ -102,48 +102,59 @@ namespace MyerSplash.UC
 
         private void ItemContainer_Loaded(object sender, RoutedEventArgs e)
         {
-            var itemsPanel = (ItemsWrapGrid)ImageGridView.ItemsPanelRoot;
-            var itemContainer = (GridViewItem)sender;
-            var itemIndex = ImageGridView.IndexFromContainer(itemContainer);
+            //var itemsPanel = (ItemsWrapGrid)ImageGridView.ItemsPanelRoot;
+            //var itemContainer = (GridViewItem)sender;
+            //var itemIndex = ImageGridView.IndexFromContainer(itemContainer);
 
-            // Don't animate if we're not in the visible viewport
-            if (itemIndex >= itemsPanel.FirstVisibleIndex && itemIndex <= itemsPanel.LastVisibleIndex)
-            {
-                var itemVisual = ElementCompositionPreview.GetElementVisual(itemContainer);
-                var delayIndex = itemIndex - itemsPanel.FirstVisibleIndex;
+            //// Don't animate if we're not in the visible viewport
+            //if (itemIndex >= itemsPanel.FirstVisibleIndex && itemIndex <= itemsPanel.LastVisibleIndex)
+            //{
+            //    var itemVisual = ElementCompositionPreview.GetElementVisual(itemContainer);
+            //    var delayIndex = itemIndex - itemsPanel.FirstVisibleIndex;
 
-                itemVisual.Opacity = 0f;
-                itemVisual.Offset = new Vector3(50, 0, 0);
+            //    itemVisual.Opacity = 0f;
+            //    itemVisual.Offset = new Vector3(50, 0, 0);
 
-                // Create KeyFrameAnimations
-                var offsetAnimation = _compositor.CreateScalarKeyFrameAnimation();
-                offsetAnimation.InsertExpressionKeyFrame(1f, "0");
-                offsetAnimation.Duration = TimeSpan.FromMilliseconds(700);
-                offsetAnimation.DelayTime = TimeSpan.FromMilliseconds((delayIndex * 100));
+            //    // Create KeyFrameAnimations
+            //    var offsetAnimation = _compositor.CreateScalarKeyFrameAnimation();
+            //    offsetAnimation.InsertExpressionKeyFrame(1f, "0");
+            //    offsetAnimation.Duration = TimeSpan.FromMilliseconds(700);
+            //    offsetAnimation.DelayTime = TimeSpan.FromMilliseconds((delayIndex * 100));
 
-                var fadeAnimation = _compositor.CreateScalarKeyFrameAnimation();
-                fadeAnimation.InsertExpressionKeyFrame(1f, "1");
-                fadeAnimation.Duration = TimeSpan.FromMilliseconds(700);
-                fadeAnimation.DelayTime = TimeSpan.FromMilliseconds(delayIndex * 100);
+            //    var fadeAnimation = _compositor.CreateScalarKeyFrameAnimation();
+            //    fadeAnimation.InsertExpressionKeyFrame(1f, "1");
+            //    fadeAnimation.Duration = TimeSpan.FromMilliseconds(700);
+            //    fadeAnimation.DelayTime = TimeSpan.FromMilliseconds(delayIndex * 100);
 
-                // Start animations
-                itemVisual.StartAnimation("Offset.X", offsetAnimation);
-                itemVisual.StartAnimation("Opacity", fadeAnimation);
-            }
-            itemContainer.Loaded -= ItemContainer_Loaded;
+            //    // Start animations
+            //    itemVisual.StartAnimation("Offset.X", offsetAnimation);
+            //    itemVisual.StartAnimation("Opacity", fadeAnimation);
+            //}
+            //itemContainer.Loaded -= ItemContainer_Loaded;
         }
         #endregion
 
         private void ImageGridView_Loaded(object sender, RoutedEventArgs e)
         {
-            var scrollViewer = ImageGridView.GetScrollViewer();
-            scrollViewer.ViewChanging -= ScrollViewer_ViewChanging;
-            scrollViewer.ViewChanging += ScrollViewer_ViewChanging;
+            MainSV.ViewChanging -= ScrollViewer_ViewChanging;
+            MainSV.ViewChanging += ScrollViewer_ViewChanging;
         }
 
         private void ScrollViewer_ViewChanging(object sender, ScrollViewerViewChangingEventArgs e)
         {
             OnScrollViewerViewChanged?.Invoke(sender as ScrollViewer);
+        }
+
+        private void WaterfallFlowView_ItemTapped(object sender, Marduk.Controls.ItemTappedEventArgs e)
+        {
+            var item = e.Item;
+            var container = e.Container;
+            Canvas.SetZIndex(container, ++_zindex);
+
+            _containerVisual = ElementCompositionPreview.GetElementVisual(container);
+
+            var img = item as UnsplashImage;
+            OnClickItemStarted?.Invoke(img, container);
         }
     }
 }
