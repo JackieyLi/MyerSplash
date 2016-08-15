@@ -117,27 +117,25 @@ namespace MyerSplash.UC
             var itemContainer = (GridViewItem)sender;
             var itemIndex = ImageGridView.IndexFromContainer(itemContainer);
 
-            // Don't animate if we're not in the visible viewport
             if (itemIndex >= itemsPanel.FirstVisibleIndex && itemIndex <= itemsPanel.LastVisibleIndex)
             {
                 var itemVisual = ElementCompositionPreview.GetElementVisual(itemContainer);
                 var delayIndex = itemIndex - itemsPanel.FirstVisibleIndex;
 
+                var startOffsetX = itemVisual.Offset.X;
                 itemVisual.Opacity = 0f;
-                itemVisual.Offset = new Vector3(50, 0, 0);
+                itemVisual.Offset = new Vector3(itemVisual.Offset.X + 50, 0, 0);
 
-                // Create KeyFrameAnimations
                 var offsetAnimation = _compositor.CreateScalarKeyFrameAnimation();
-                offsetAnimation.InsertExpressionKeyFrame(1f, "0");
+                offsetAnimation.InsertKeyFrame(1f, startOffsetX);
                 offsetAnimation.Duration = TimeSpan.FromMilliseconds(700);
                 offsetAnimation.DelayTime = TimeSpan.FromMilliseconds((delayIndex * 100));
 
                 var fadeAnimation = _compositor.CreateScalarKeyFrameAnimation();
-                fadeAnimation.InsertExpressionKeyFrame(1f, "1");
+                fadeAnimation.InsertKeyFrame(1f, 1f);
                 fadeAnimation.Duration = TimeSpan.FromMilliseconds(700);
                 fadeAnimation.DelayTime = TimeSpan.FromMilliseconds(delayIndex * 100);
 
-                // Start animations
                 itemVisual.StartAnimation("Offset.X", offsetAnimation);
                 itemVisual.StartAnimation("Opacity", fadeAnimation);
             }
@@ -160,7 +158,7 @@ namespace MyerSplash.UC
         private void RootGrid_Loaded(object sender, RoutedEventArgs e)
         {
             var rootGrid = sender as Grid;
-           
+
             rootGrid.PointerEntered += RootGrid_PointerEntered;
             rootGrid.PointerExited += RootGrid_PointerExited;
 
@@ -184,7 +182,7 @@ namespace MyerSplash.UC
 
         private void RootGrid_PointerEntered(object sender, PointerRoutedEventArgs e)
         {
-            if(e.Pointer.PointerDeviceType!=PointerDeviceType.Mouse)
+            if (e.Pointer.PointerDeviceType != PointerDeviceType.Mouse)
             {
                 return;
             }

@@ -4,6 +4,7 @@ using MyerSplash.UC;
 using MyerSplash.ViewModel;
 using SamplesCommon;
 using System;
+using System.Diagnostics;
 using System.Numerics;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation;
@@ -28,6 +29,7 @@ namespace MyerSplash.View
         private Visual _drawerMaskVisual;
         private Visual _titleGridVisual;
         private Visual _refreshBtnVisual;
+        private Visual _rootVisual;
 
         private double _lastVerticalOffset = 0;
         private bool _isHideTitleGrid = false;
@@ -43,7 +45,8 @@ namespace MyerSplash.View
         }
 
         public static readonly DependencyProperty IsLoadingProperty =
-            DependencyProperty.Register("IsLoading", typeof(bool), typeof(MainViewModel), new PropertyMetadata(false, OnLoadingPropertyChanged));
+            DependencyProperty.Register("IsLoading", typeof(bool), typeof(MainViewModel), 
+                new PropertyMetadata(false, OnLoadingPropertyChanged));
 
         public static void OnLoadingPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -93,7 +96,7 @@ namespace MyerSplash.View
 
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
-            _loadingVisual.Offset = new Vector3(0f, -60f, 0f);
+            _loadingVisual.Offset = new Vector3(0f, -70f, 0f);
             _drawerMaskVisual.Opacity = 0;
             _drawerVisual.Offset = new Vector3(-300f, 0f, 0f);
 
@@ -129,28 +132,27 @@ namespace MyerSplash.View
 
         private void InitComposition()
         {
-            SurfaceLoader.Initialize(ElementCompositionPreview.GetElementVisual(this).Compositor);
-
             _compositor = ElementCompositionPreview.GetElementVisual(this).Compositor;
+            _rootVisual = ElementCompositionPreview.GetElementVisual(this);
             _loadingVisual = ElementCompositionPreview.GetElementVisual(LoadingGrid);
             _refreshVisual = ElementCompositionPreview.GetElementVisual(RefreshIcon);
             _drawerVisual = ElementCompositionPreview.GetElementVisual(DrawerControl);
             _drawerMaskVisual = ElementCompositionPreview.GetElementVisual(DrawerMaskBorder);
             _titleGridVisual = ElementCompositionPreview.GetElementVisual(TitleGrid);
             _refreshBtnVisual = ElementCompositionPreview.GetElementVisual(RefreshBtn);
+
+            SurfaceLoader.Initialize(_compositor);
         }
 
         #region Loading animation
         private void ShowLoading()
         {
-            var showAnimation = _compositor.CreateVector3KeyFrameAnimation();
-            showAnimation.InsertKeyFrame(1, new Vector3(0f, 50f, 0f));
+            var showAnimation = _compositor.CreateScalarKeyFrameAnimation();
+            showAnimation.InsertKeyFrame(1f,80f);
             showAnimation.Duration = TimeSpan.FromMilliseconds(500);
 
-            var linearEasingFunc = _compositor.CreateLinearEasingFunction();
-
             var rotateAnimation = _compositor.CreateScalarKeyFrameAnimation();
-            rotateAnimation.InsertKeyFrame(1, 3600f, linearEasingFunc);
+            rotateAnimation.InsertKeyFrame(1, 3600f, _compositor.CreateLinearEasingFunction());
             rotateAnimation.Duration = TimeSpan.FromMilliseconds(10000);
             rotateAnimation.IterationBehavior = AnimationIterationBehavior.Forever;
 
@@ -160,13 +162,13 @@ namespace MyerSplash.View
 
             _refreshVisual.StopAnimation("RotationAngleInDegrees");
             _refreshVisual.StartAnimation("RotationAngleInDegrees", rotateAnimation);
-            _loadingVisual.StartAnimation("Offset", showAnimation);
+            _loadingVisual.StartAnimation("Offset.y", showAnimation);
         }
 
         private void HideLoading()
         {
             var showAnimation = _compositor.CreateScalarKeyFrameAnimation();
-            showAnimation.InsertKeyFrame(1, -60f);
+            showAnimation.InsertKeyFrame(1, -80f);
             showAnimation.Duration = TimeSpan.FromMilliseconds(500);
 
             var batch = _compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
@@ -311,11 +313,20 @@ namespace MyerSplash.View
 
         private void ToggleRefreshBtnAnimation(bool show)
         {
-            var offsetAnimation = _compositor.CreateScalarKeyFrameAnimation();
-            offsetAnimation.InsertKeyFrame(1f, show ? 0f : 100f);
-            offsetAnimation.Duration = TimeSpan.FromMilliseconds(500);
+            Debug.WriteLine(_refreshBtnVisual.Offset);
 
-            _refreshBtnVisual.StartAnimation("Offset.Y", offsetAnimation);
+            _refreshBtnVisual.CenterPoint = new Vector3((float)RefreshBtn.ActualWidth/2f, (float)RefreshBtn.ActualHeight/2f, 0f);
+            var scaleAnimation = _compositor.CreateVector3KeyFrameAnimation();
+            scaleAnimation.InsertKeyFrame(1f, show ? new Vector3(1f, 1f, 1f) : new Vector3(0f, 0f, 0f));
+            scaleAnimation.Duration = TimeSpan.FromMilliseconds(500);
+            _refreshBtnVisual.StartAnimation("Scale", scaleAnimation);
+
+            //var offsetAnimation = _compositor.CreateScalarKeyFrameAnimation();
+            //offsetAnimation.InsertKeyFrame(1f,!show ? _rootVisual.Size.Y:_rootVisual.Size.Y-70f);
+            //offsetAnimation.SetVector3Parameter("offset", _refreshBtnVisual.Offset);
+            //offsetAnimation.Duration = TimeSpan.FromMilliseconds(500);
+            //_refreshBtnVisual.StartAnimation("Offset.Y", offsetAnimation);
+
         }
 
         private void ListControl_OnScrollViewerViewChanged(ScrollViewer scrollViewer)
