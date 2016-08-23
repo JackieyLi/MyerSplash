@@ -117,27 +117,41 @@ namespace MyerSplash.UC
             var itemContainer = (GridViewItem)sender;
             var itemIndex = ImageGridView.IndexFromContainer(itemContainer);
 
+            var itemVisual = ElementCompositionPreview.GetElementVisual(itemContainer);
+
+            // Create an animation to animate targetVisual's Offset property to its final value
+            var repositionAnimation = _compositor.CreateVector3KeyFrameAnimation();
+            repositionAnimation.Duration = TimeSpan.FromSeconds(0.3);
+            repositionAnimation.Target = "Offset";
+            repositionAnimation.InsertExpressionKeyFrame(1.0f, "this.FinalValue");
+
+            // Run this animation when the Offset Property is changed
+            var repositionAnimations = _compositor.CreateImplicitAnimationCollection();
+            repositionAnimations["Offset"] = repositionAnimation;
+
+            itemVisual.ImplicitAnimations = repositionAnimations;
+
             if (itemIndex >= itemsPanel.FirstVisibleIndex && itemIndex <= itemsPanel.LastVisibleIndex)
             {
-                var itemVisual = ElementCompositionPreview.GetElementVisual(itemContainer);
-                var delayIndex = itemIndex - itemsPanel.FirstVisibleIndex;
+                
+                //var delayIndex = itemIndex - itemsPanel.FirstVisibleIndex;
 
-                var startOffsetX = itemVisual.Offset.X;
-                itemVisual.Opacity = 0f;
-                itemVisual.Offset = new Vector3(itemVisual.Offset.X + 50, 0, 0);
+                //var startOffsetX = itemVisual.Offset.X;
+                //itemVisual.Opacity = 0f;
+                //itemVisual.Offset = new Vector3(itemVisual.Offset.X + 50, 0, 0);
 
-                var offsetAnimation = _compositor.CreateScalarKeyFrameAnimation();
-                offsetAnimation.InsertKeyFrame(1f, startOffsetX);
-                offsetAnimation.Duration = TimeSpan.FromMilliseconds(700);
-                offsetAnimation.DelayTime = TimeSpan.FromMilliseconds((delayIndex * 100));
+                //var offsetAnimation = _compositor.CreateScalarKeyFrameAnimation();
+                //offsetAnimation.InsertKeyFrame(1f, startOffsetX);
+                //offsetAnimation.Duration = TimeSpan.FromMilliseconds(700);
+                //offsetAnimation.DelayTime = TimeSpan.FromMilliseconds((delayIndex * 100));
 
-                var fadeAnimation = _compositor.CreateScalarKeyFrameAnimation();
-                fadeAnimation.InsertKeyFrame(1f, 1f);
-                fadeAnimation.Duration = TimeSpan.FromMilliseconds(700);
-                fadeAnimation.DelayTime = TimeSpan.FromMilliseconds(delayIndex * 100);
+                //var fadeAnimation = _compositor.CreateScalarKeyFrameAnimation();
+                //fadeAnimation.InsertKeyFrame(1f, 1f);
+                //fadeAnimation.Duration = TimeSpan.FromMilliseconds(700);
+                //fadeAnimation.DelayTime = TimeSpan.FromMilliseconds(delayIndex * 100);
 
-                itemVisual.StartAnimation("Offset.X", offsetAnimation);
-                itemVisual.StartAnimation("Opacity", fadeAnimation);
+                //itemVisual.StartAnimation("Offset.X", offsetAnimation);
+                //itemVisual.StartAnimation("Opacity", fadeAnimation);
             }
             itemContainer.Loaded -= ItemContainer_Loaded;
         }
